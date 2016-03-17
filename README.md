@@ -145,6 +145,11 @@ unset($foo);
 // you can make it more intensive (paying for it with some performance)
 // by adjusting third argument of WeakArray constructor
 // (see WeakArray\WeakArray::__construct()).
+// 
+// Also you can force garbage collector to run immediately by calling
+// "gc_collect_cycles()".
+
+gc_collect_cycles();
 ```
 
 #### Output
