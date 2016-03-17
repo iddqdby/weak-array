@@ -355,7 +355,7 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
     /**
      * @covers WeakArray::offsetSet
      * @expectedException \InvalidArgumentException
-     * @expectedExceptiomMessageRegExp /WeakArray can hold only objects, (boolean|integer|double|string|array|resource|NULL|unknown type) given\./
+     * @expectedExceptionMessageRegExp /WeakArray can hold only objects, "(boolean|integer|double|string|array|resource|NULL|unknown type)" given\./
      * @dataProvider provider_Exception
      */
     public function test_offsetSet_Exception( array $array ) {
@@ -493,6 +493,7 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
         unset( $objects_copy['baz'] );
 
         foreach( $this->weak_array as $key => $obj ) {
+            $this->assertInstanceOf( stdClass::class, $obj );
             if( 1 === $key ) {
                 unset( $this->weak_array['baz'] );
             }
@@ -508,6 +509,7 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
         unset( $objects_copy[2] );
 
         foreach( $this->weak_array as $key => $obj ) {
+            $this->assertInstanceOf( stdClass::class, $obj );
             if( 1 === $key ) {
                 unset( $this->objects[2] );
             }
@@ -523,6 +525,7 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
         unset( $objects_copy[3] );
 
         foreach( $this->weak_array as $key => $obj ) {
+            $this->assertInstanceOf( stdClass::class, $obj );
             if( 1 === $key ) {
                 unset( $this->weak_array[3] );
             }
@@ -538,6 +541,7 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
         unset( $objects_copy[1] );
 
         foreach( $this->weak_array as $key => $obj ) {
+            $this->assertInstanceOf( stdClass::class, $obj );
             if( 1 === $key ) {
                 unset( $this->weak_array[ $key ] );
             }
@@ -572,6 +576,7 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
 
 
         foreach( $this->weak_array as $key => $obj ) {
+            $this->assertInstanceOf( stdClass::class, $obj );
             if( 3 === $key ) {
                 unset( $obj4 );
                 unset( $objects[4] );
@@ -586,6 +591,7 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
 
 
         foreach( $this->weak_array as $key => $obj ) {
+            $this->assertInstanceOf( stdClass::class, $obj );
             if( 2 === $key ) {
                 unset( $this->weak_array[3] );
                 unset( $objects[3] );
