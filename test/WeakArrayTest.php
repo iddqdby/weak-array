@@ -40,7 +40,7 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
             3 => $three,
         ];
 
-        $this->weak_array = new WeakArray( $this->objects );
+        $this->weak_array = new WeakArray( $this->objects, true );
     }
 
 
@@ -117,6 +117,8 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
      */
     public function test_offsetExists() {
 
+        /* Test with default garbage collection period */
+
         $this->assertArrayHasKey( 'foo', $this->weak_array );
         $this->assertArrayHasKey( 'bar', $this->weak_array );
         $this->assertArrayHasKey( 'baz', $this->weak_array );
@@ -131,6 +133,7 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
 
         unset( $this->objects['foo'] );
         unset( $this->objects['bar'] );
+        gc_collect_cycles();
 
         $this->assertArrayNotHasKey( 'foo', $this->weak_array );
         $this->assertArrayNotHasKey( 'bar', $this->weak_array );
@@ -149,6 +152,7 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
         unset( $this->objects[1] );
         unset( $this->objects[2] );
         unset( $this->objects[3] );
+        gc_collect_cycles();
 
         $this->assertArrayNotHasKey( 'foo', $this->weak_array );
         $this->assertArrayNotHasKey( 'bar', $this->weak_array );
@@ -167,6 +171,9 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
      * @covers WeakArray::offsetGet
      */
     public function test_offsetGet() {
+
+        /* Test with shortest possible grabage collection period (intensive garbage collection) */
+        $this->weak_array->setGarbageCollectionPeriod( WeakArray::GARBAGE_COLLECTION_PERIOD_INTENSIVE );
 
         $this->assertSame( $this->objects['foo'], $this->weak_array['foo'] );
         $this->assertSame( $this->objects['bar'], $this->weak_array['bar'] );
@@ -221,6 +228,9 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
      * @covers WeakArray::keys
      */
     public function test_offsetSet() {
+
+        /* Test with shortest possible grabage collection period (intensive garbage collection) */
+        $this->weak_array->setGarbageCollectionPeriod( WeakArray::GARBAGE_COLLECTION_PERIOD_INTENSIVE );
 
         $zero = new stdClass();
         $empty_str = new stdClass();
@@ -444,6 +454,9 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
      * @covers WeakArray::valid
      */
     public function test_foreach() {
+
+        /* Test with shortest possible grabage collection period (intensive garbage collection) */
+        $this->weak_array->setGarbageCollectionPeriod( WeakArray::GARBAGE_COLLECTION_PERIOD_INTENSIVE );
 
         $str_expected = $this->foreach_concatObjectPropertyValues( $this->objects );
         $str_actual = $this->foreach_concatObjectPropertyValues( $this->weak_array );
@@ -744,6 +757,41 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
         $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_NOTIFY, 'key' => null ];
         $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_NOTIFY, 'key' => null ];
         $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_NOTIFY, 'key' => null ];
+
+
+        $this->assertEquals( $expected_1, $obs1->collected() );
+        $this->assertEquals( $expected_2, $obs2->collected() );
+        $this->assertEquals( $expected_3, $obs3->collected() );
+
+
+        unset( $obj5 );
+        unset( $obj4 );
+        unset( $obj3 );
+        gc_collect_cycles();
+
+        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_DESTRUCT, 'key' => 999 ];
+        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_DESTRUCT, 'key' => '' ];
+        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_DESTRUCT, 'key' => 0 ];
+        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_DESTRUCT, 'key' => 999 ];
+        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_DESTRUCT, 'key' => '' ];
+        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_DESTRUCT, 'key' => 0 ];
+        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_DESTRUCT, 'key' => 999 ];
+        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_DESTRUCT, 'key' => '' ];
+        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_DESTRUCT, 'key' => 0 ];
+
+
+        $this->assertEquals( $expected_1, $obs1->collected() );
+        $this->assertEquals( $expected_2, $obs2->collected() );
+        $this->assertEquals( $expected_3, $obs3->collected() );
+
+
+        $this->weak_array->detach( $obs3 );
+
+        unset( $obj2 );
+        gc_collect_cycles();
+
+        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_DESTRUCT, 'key' => 1002 ];
+        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_DESTRUCT, 'key' => 1002 ];
 
 
         $this->assertEquals( $expected_1, $obs1->collected() );

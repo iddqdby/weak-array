@@ -38,28 +38,58 @@ use InvalidArgumentException;
 
 /**
  * Array of weak references.
+ *
+ * WARNING: if detection of destructions is enabled in the constructor
+ * ($detect_destructions parameter of the constructor is set to true)
+ * stored objects should not have a *property* named "__destruct",
+ * and it should be possible to create nonexistent properties dynamically
+ * for these objects (i.e. objects should not implement magic method "__set()");
+ * otherwise it will be impossible to detect destruction of such stored objects
+ * (event of type "WeakArray\Event::TYPE_DESTRUCT" will not raise for these objects).
  */
 class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
+
+    /** Default amout of interactions with instance of WeakArray before enforcing the garbage collecting */
+    const GARBAGE_COLLECTION_PERIOD_DEFAULT = 1024;
+
+    /** Minimal amout of interactions with instance of WeakArray to enforce intensive garbage collecting */
+    const GARBAGE_COLLECTION_PERIOD_INTENSIVE = 1;
+
+
+    /** @var int */
+    protected $gc_period;
+
+    /** @var int */
+    protected $gc_int_count = 0;
 
     /** @var WeakRef[] */
     protected $array = [];
 
-    /** @var Event */
-    protected $last_event;
-
-    /** @var SplObjectStorage<SplObserver, null> */
+    /** @var SplObjectStorage */
     protected $observers;
+
+    /** @var bool */
+    protected $detect_destructions;
 
 
     /**
      * Create new array of weak references.
      *
      * @param array $objects an optional array of objects
-     * @throws InvalidArgumentException if array contains value that is not an object
+     * @param bool $detect_destructions detect destructions of objects;
+     * if set to true, observers will be notified with event of type Event::TYPE_DESTRUCT
+     * when some object from this array is destructed by garbage collector
+     * (optional, default is false -- do not detect destructions)
+     * @param int $gc_period amout of interactions with instance of WeakArray
+     * before enforcing the garbage collection
+     * (optional, default is WeakArray::GARBAGE_COLLECTION_PERIOD_DEFAULT)
+     * @throws InvalidArgumentException if garbage collection period is less than 1,
+     * or array contains value that is not an object
      */
-    public function __construct( array $objects = [] ) {
+    public function __construct( array $objects = [], $detect_destructions = false, $gc_period = self::GARBAGE_COLLECTION_PERIOD_DEFAULT ) {
         $this->observers = new SplObjectStorage();
-        $this->updateLastEvent();
+        $this->detect_destructions = (bool)$detect_destructions;
+        $this->setGarbageCollectionPeriod( $gc_period );
         foreach( $objects as $key => $obj ) {
             $this[ $key ] = $obj;
         }
@@ -67,23 +97,17 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
 
 
     protected function gc( $force = false ) {
-        static $i = 0;
-        if( $force || ++$i == 1024 ) {
-            $i = 0;
-            // "array_filter()" resets internal array pointer, so we don't us it;
+        if( $force || ++$this->gc_int_count >= $this->gc_period ) {
+            $this->gc_int_count = 0;
+            // "array_filter()" resets internal array pointer, so we don't use it;
             // internal array pointer is used in implemented methods of the "Iterator" interface
+            gc_collect_cycles();
             foreach( array_keys( $this->array ) as $key ) {
                 if( !$this->array[ $key ]->valid() ) {
                     unset( $this->array[ $key ] );
                 }
             }
         }
-    }
-
-
-    protected function updateLastEvent( $key = null, $type = Event::TYPE_NOTIFY ) {
-        $this->last_event = new Event( $this, $type, $key );
-        return $this->last_event;
     }
 
 
@@ -95,6 +119,24 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
     public function keys() {
         $this->gc( true );
         return array_keys( $this->array );
+    }
+
+
+    /**
+     * Set garbage collection period.
+     *
+     * @param int $gc_period amout of interactions with instance of WeakArray
+     * before enforcing the garbage collection
+     * @throws InvalidArgumentException if garbage collection period is less than 1
+     */
+    public function setGarbageCollectionPeriod( $gc_period ) {
+
+        $gc_period = intval( $gc_period );
+        if( 1 > $gc_period ) {
+            throw new InvalidArgumentException( 'Garbage collection period must be greater than 0.' );
+        }
+
+        $this->gc_period = $gc_period;
     }
 
 
@@ -118,7 +160,8 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
 
     public function offsetGet( $offset ) {
         $this->gc();
-        return isset( $this->array[ $offset ] ) ? $this->array[ $offset ]->get() : null;
+        $value = isset( $this->array[ $offset ] ) ? $this->array[ $offset ]->get() : null;
+        return $value instanceof DestructionDetector ? $value->getObject() : $value;
     }
 
 
@@ -127,22 +170,50 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
         if( !is_object( $value ) ) {
             throw new InvalidArgumentException( sprintf( 'WeakArray can hold only objects, "%s" given.', gettype( $value ) ) );
         }
+        if( $value instanceof DestructionDetector ) {
+            throw new InvalidArgumentException( 'Unable to save instance of DestructionDetector straightforwardly.' );
+        }
+
+        $dd = null;
+        if(
+            $this->detect_destructions
+            &&
+            !property_exists( $value, '__destruct' )
+            &&
+            !method_exists( $value, '__set' )
+        ) {
+            // Saving reference to instance of DestructionDetector in a property
+            // of an object prevents immediate garbage collection of that instance
+            // after leaving current scope, but it creates a circular reference,
+            // so we need to invoke gc_collect_cycles() periodically to speed-up
+            // garbage collection;
+            // see https://secure.php.net/manual/en/features.gc.collecting-cycles.php
+            $dd = new DestructionDetector( $this, $offset, $value );
+            $value->__destruct = $dd;
+            $value = $dd;
+        }
 
         $reference = new WeakRef( $value );
 
         if( null === $offset ) {
+
             $this->array[] = $reference;
+
             // Get index of last inserted item
             $array_copy = $this->array;
             end( $array_copy );
             $offset = key( $array_copy );
+
+            if( $dd ) {
+                $dd->setKey( $offset );
+            }
+
         } else {
             $this->array[ $offset ] = $reference;
         }
 
         $this->gc();
-        $this->updateLastEvent( $offset, Event::TYPE_SET );
-        $this->notify();
+        $this->notify( new Event( $this, Event::TYPE_SET, $offset ) );
 
         return $value;
     }
@@ -153,8 +224,7 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
         unset( $this->array[ $offset ] );
 
         $this->gc();
-        $this->updateLastEvent( $offset, Event::TYPE_UNSET );
-        $this->notify();
+        $this->notify( new Event( $this, Event::TYPE_UNSET, $offset ) );
     }
 
 
@@ -162,6 +232,7 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
 
 
     public function rewind() {
+        $this->gc();
         reset( $this->array );
     }
 
@@ -175,6 +246,7 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
          * but in first case it can easily lead to stack owerflow on big arrays,
          * and in second one it just have meaningless evaluation in "while".
          */
+        $this->gc();
         loop: {
 
             $reference = current( $this->array );
@@ -184,7 +256,7 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
 
             $value = $reference->get();
             if( $value ) {
-                return $value;
+                return $value instanceof DestructionDetector ? $value->getObject() : $value;
             }
 
             unset( $this->array[ key( $this->array ) ] );
@@ -195,6 +267,7 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
 
 
     public function key() {
+        $this->gc();
         loop: {
 
             $key = key( $this->array );
@@ -214,6 +287,7 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
 
 
     public function next() {
+        $this->gc();
         $next = next( $this->array );
         while( false !== $next && !$next->valid() ) {
             unset( $this->array[ key( $this->array ) ] );
@@ -223,6 +297,7 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
 
 
     public function valid() {
+        $this->gc();
         while( null !== ( $key = key( $this->array ) ) ) {
             if( $this->array[ $key ]->valid() ) {
                 return true;
@@ -261,11 +336,15 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
      */
     public function notify() {
 
-        foreach( $this->observers as $observer ) {
-            $observer->update( $this->last_event );
+        $event = @func_get_arg( 0 );
+
+        if( !$event instanceof Event ) {
+            $event = new Event( $this, Event::TYPE_NOTIFY, null );
         }
 
-        $this->updateLastEvent();
+        foreach( $this->observers as $observer ) {
+            $observer->update( $event );
+        }
     }
 
 }

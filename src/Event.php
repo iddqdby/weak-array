@@ -39,10 +39,12 @@ class Event implements SplSubject {
     const TYPE_NOTIFY = 0;
     const TYPE_SET = 1;
     const TYPE_UNSET = 2;
+    const TYPE_DESTRUCT = 3;
     const TYPES = [
         self::TYPE_NOTIFY,
         self::TYPE_SET,
         self::TYPE_UNSET,
+        self::TYPE_DESTRUCT,
     ];
 
     private $subject;
