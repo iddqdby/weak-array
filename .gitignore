@@ -2,5 +2,5 @@
 .buildpath
 .project
 .settings
-.composer.lock
+composer.lock
 
