@@ -243,7 +243,7 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
          *
          * Yes, it is possible to rewrite this method (and next one)
          * with recursion or with infinite "do { ... } while(true)" loop,
-         * but in first case it can easily lead to stack owerflow on big arrays,
+         * but in first case it can easily lead to stack overflow on big arrays,
          * and in second one it just have meaningless evaluation in "while".
          */
         $this->gc();
