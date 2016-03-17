@@ -1,0 +1,31 @@
+{
+	"name" : "iddqdby/weak-array",
+	"description" : "Array of weak references.",
+	"type" : "library",
+	"homepage" : "https://github.com/iddqdby/weak-array",
+	"license" : "MIT",
+	"support" : {
+		"source" : "https://github.com/iddqdby/weak-array",
+		"issues" : "https://github.com/iddqdby/weak-array/issues"
+	},
+	"keywords" : ["weak reference", "weak references"],
+	"authors" : [
+                {
+			"name" : "Sergey Protasevich",
+			"email" : "sergey.p@gmx.com"
+		}
+	],
+	"require" : {
+		"php" : "^5.5 || ^7.0",
+                "ext-weakref" : "^0.3"
+	},
+	"autoload" : {
+		"psr-4" : {
+			"WeakArray\\" : "src"
+		}
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^5.2",
+		"phpunit/php-invoker": "^1.1"
+	}
+}
