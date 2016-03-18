@@ -165,6 +165,10 @@ See `test/` directory for more examples.
 * PHP >= 5.5
 * WeakRef PHP extension >= 0.3
 
+## Versioning
+
+This project follows the [Semantic Versioning](http://semver.org/) principles.
+
 ## License
 
-This program is licensed under the MIT License. See [LICENSE](LICENSE).
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
