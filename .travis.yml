@@ -5,7 +5,7 @@ php:
   - 5.5
   - hhvm
 install:
-  - pear install pecl/Weakref-2.6
+  - pear install -s pecl/Weakref-2.6
   - pear install -s pecl/Weakref
   - phpenv rehash
   - composer install
