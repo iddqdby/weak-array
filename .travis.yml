@@ -3,7 +3,9 @@ php:
   - 7.0
   - 5.6
   - 5.5
-  - hhvm
+before_install:
+  - phpenv version
+  - phpenv version | sed "s/ (.*//g"
 install:
   - if [ `phpenv version | sed "s/ (.*//g"` == "7.0.0" ]; then pecl install Weakref; else pecl install Weakref-0.2.6; fi
   - phpenv rehash
