@@ -5,8 +5,7 @@ php:
   - 5.5
   - hhvm
 install:
-  - pear install -s pecl/Weakref-2.6
-  - pear install -s pecl/Weakref
+  - if [ `phpenv version | sed "s/ (.*//g"` == "7.0.0" ]; then pecl install Weakref; else pecl install Weakref-0.2.6; fi
   - phpenv rehash
   - composer install
 branches:
