@@ -6,7 +6,7 @@ php:
 before_install:
   - phpenv version
 install:
-  - if [ `phpenv version | sed "s/ (.*//g"` == "7.0" ]; then pecl install Weakref; else pecl install Weakref-0.2.6; fi
+  - if [ `phpenv version | sed "s/ (.*//g"` == "7.0" ]; then pecl install Weakref-beta; else pecl install Weakref-0.2.6; fi
   - phpenv rehash
   - composer install
 branches:
