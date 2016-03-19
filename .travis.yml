@@ -1,0 +1,15 @@
+language: php
+php:
+  - 7.0
+  - 5.6
+  - 5.5
+  - hhvm
+install:
+  - pear install pecl/Weakref-2.6
+  - pear install -s pecl/Weakref
+  - phpenv rehash
+  - composer install
+branches:
+  only:
+    - master
+    - /^\d+\.\d+\.x$/

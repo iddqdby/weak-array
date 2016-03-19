@@ -8,7 +8,7 @@
 		"source" : "https://github.com/iddqdby/weak-array",
 		"issues" : "https://github.com/iddqdby/weak-array/issues"
 	},
-	"keywords" : ["weak reference", "weak references"],
+	"keywords" : ["weak reference", "weak references", "weak array", "weak arrays", "weak", "reference", "references", "array", "arrays", "weakref", "weakmap", "weakarray"],
 	"authors" : [
                 {
 			"name" : "Sergey Protasevich",
@@ -17,15 +17,15 @@
 	],
 	"require" : {
 		"php" : "^5.5 || ^7.0",
-                "ext-weakref" : "^0.3"
+                "ext-weakref" : "~0.2"
 	},
+        "require-dev": {
+                "phpunit/phpunit": "^5.2",
+                "phpunit/php-invoker": "^1.1"
+        },
 	"autoload" : {
 		"psr-4" : {
 			"WeakArray\\" : "src"
 		}
-	},
-	"require-dev": {
-		"phpunit/phpunit": "^5.2",
-		"phpunit/php-invoker": "^1.1"
 	}
 }
