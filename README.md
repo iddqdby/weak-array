@@ -1,5 +1,7 @@
 # WeakArray
 
+[![Build Status](https://travis-ci.org/iddqdby/weak-array.svg?branch=master)](https://travis-ci.org/iddqdby/weak-array)
+
 ## Short description
 
 WeakArray is an array of weak references, based on WeakRef PHP extension (see https://pecl.php.net/package/Weakref).
