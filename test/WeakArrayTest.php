@@ -807,10 +807,22 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
      */
     public function test_Event_construct_Exception( $type, $key, $expected_exception_class, $expected_exception_message ) {
 
-        $this->expectException( $expected_exception_class );
-        $this->expectExceptionMessage( $expected_exception_message );
+        if( preg_match( '/5\.5.*/', PHP_VERSION ) ) {
 
-        new Event( $this->weak_array, $type, $key );
+            try {
+                new Event( $this->weak_array, $type, $key );
+            } catch( \Exception $ex ) {
+                $this->assertInstanceOf( $expected_exception_class, $ex );
+                $this->assertEquals( $expected_exception_message, $ex->getMessage() );
+            }
+
+        } else {
+
+            $this->expectException( $expected_exception_class );
+            $this->expectExceptionMessage( $expected_exception_message );
+
+            new Event( $this->weak_array, $type, $key );
+        }
     }
 
 
