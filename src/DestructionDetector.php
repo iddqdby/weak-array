@@ -30,8 +30,8 @@ use WeakRef;
 
 
 /**
- * DestructionDetector performs an action
- * when destructed by Garbage Collector.
+ * DestructionDetector notifies an instance of WeakArray
+ * when it destructs by Garbage Collector.
  */
 final class DestructionDetector {
 
@@ -54,7 +54,7 @@ final class DestructionDetector {
 
     public function __destruct() {
         if( $this->active && ( $weak_array = $this->ref_weak_array->get() ) ) {
-            $weak_array->notify( new Event( $weak_array, Event::TYPE_DESTRUCT, $this->key ) );
+            $weak_array->notify( new Event( $weak_array, Event::OBJECT_DESTRUCTED, $this->key ) );
         }
     }
 

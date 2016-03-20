@@ -36,15 +36,16 @@ use InvalidArgumentException;
  */
 class Event implements SplSubject {
 
-    const TYPE_NOTIFY = 0;
-    const TYPE_SET = 1;
-    const TYPE_UNSET = 2;
-    const TYPE_DESTRUCT = 3;
-    const TYPES = [
-        self::TYPE_NOTIFY,
-        self::TYPE_SET,
-        self::TYPE_UNSET,
-        self::TYPE_DESTRUCT,
+    const NOTIFIED = 0;
+    const OBJECT_SET = 1;
+    const OBJECT_UNSET = 2;
+    const OBJECT_DESTRUCTED = 3;
+
+    private static $valid_types = [
+        self::NOTIFIED,
+        self::OBJECT_SET,
+        self::OBJECT_UNSET,
+        self::OBJECT_DESTRUCTED,
     ];
 
     private $subject;
@@ -63,8 +64,8 @@ class Event implements SplSubject {
      */
     public function __construct( WeakArray $subject, $type, $key ) {
 
-        if( !in_array( $type, self::TYPES, true ) ) {
-            throw new InvalidArgumentException( 'Type must be one Event::TYPE_* constants.' );
+        if( !in_array( $type, self::$valid_types, true ) ) {
+            throw new InvalidArgumentException( 'Type must be one of Event::* constants.' );
         }
         if( null !== $key && !is_int( $key ) && !is_string( $key ) ) {
             throw new InvalidArgumentException( sprintf( 'Key must be NULL, or of type "int" or "string", "%s" given.', gettype( $key ) ) );

@@ -33,20 +33,12 @@ use SplObjectStorage;
 use SplSubject;
 use SplObserver;
 use WeakRef;
+use WeakMap;
 use InvalidArgumentException;
 
 
 /**
  * Array of weak references.
- *
- * WARNING: if detection of destructions is enabled in the constructor
- * ($detect_destructions parameter of the constructor is set to true)
- * stored objects should not have a *property* named "__destruct",
- * and it should be possible to create and unset nonexistent properties dynamically
- * for these objects (i.e. objects should not implement magic methods "__set()"
- * and "__unset()"); otherwise it will be impossible to detect destruction of such
- * stored objects (event of type "WeakArray\Event::TYPE_DESTRUCT" will not raise
- * for these objects).
  */
 class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
 
@@ -66,30 +58,26 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
     /** @var WeakRef[] */
     protected $array = [];
 
+    /** @var WeakMap<object, array<DestructionDetector>> */
+    protected $destruction_detectors;
+
     /** @var SplObjectStorage */
     protected $observers;
-
-    /** @var bool */
-    protected $detect_destructions;
 
 
     /**
      * Create new array of weak references.
      *
      * @param array $objects an optional array of objects
-     * @param bool $detect_destructions detect destructions of objects;
-     * if set to true, observers will be notified with event of type Event::TYPE_DESTRUCT
-     * when some object from this array is destructed by garbage collector
-     * (optional, default is false -- do not detect destructions)
      * @param int $gc_period amout of interactions with instance of WeakArray
-     * before enforcing the garbage collection
+     * before enforcing internal garbage collection of empty references
      * (optional, default is WeakArray::GARBAGE_COLLECTION_PERIOD_DEFAULT)
      * @throws InvalidArgumentException if garbage collection period is less than 1,
      * or array contains value that is not an object
      */
-    public function __construct( array $objects = [], $detect_destructions = false, $gc_period = self::GARBAGE_COLLECTION_PERIOD_DEFAULT ) {
+    public function __construct( array $objects = [], $gc_period = self::GARBAGE_COLLECTION_PERIOD_DEFAULT ) {
         $this->observers = new SplObjectStorage();
-        $this->detect_destructions = (bool)$detect_destructions;
+        $this->destruction_detectors = new WeakMap();
         $this->setGarbageCollectionPeriod( $gc_period );
         foreach( $objects as $key => $obj ) {
             $this[ $key ] = $obj;
@@ -172,6 +160,7 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
 
         $reference = new WeakRef( $value );
 
+        unset( $this[ $offset ] );
         if( null === $offset ) {
 
             $this->array[] = $reference;
@@ -184,20 +173,15 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
             $this->array[ $offset ] = $reference;
         }
 
-        if(
-            $this->detect_destructions
-            &&
-            !property_exists( $value, '__destruct' )
-            &&
-            !method_exists( $value, '__set' )
-            &&
-            !method_exists( $value, '__unset' )
-        ) {
-            $value->__destruct = new DestructionDetector( $this, $offset );
-        }
+        $dd = isset( $this->destruction_detectors[ $value ] )
+                ? $this->destruction_detectors[ $value ]
+                : [];
+
+        $dd[ $offset ] = new DestructionDetector( $this, $offset );
+        $this->destruction_detectors[ $value ] = $dd;
 
         $this->gc();
-        $this->notify( new Event( $this, Event::TYPE_SET, $offset ) );
+        $this->notify( new Event( $this, Event::OBJECT_SET, $offset ) );
 
         return $value;
     }
@@ -206,15 +190,19 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
     public function offsetUnset( $offset ) {
 
         $value = $this[ $offset ];
-        if( isset( $value->__destruct ) ) {
-            $value->__destruct->deactivate();
-            unset( $value->__destruct );
+
+        if( $value ) {
+
+            $dd = $this->destruction_detectors[ $value ];
+            $dd[ $offset ]->deactivate();
+            unset( $dd[ $offset ] );
+            $this->destruction_detectors[ $value ] = $dd;
+
+            unset( $this->array[ $offset ] );
+            $this->notify( new Event( $this, Event::OBJECT_UNSET, $offset ) );
         }
 
-        unset( $this->array[ $offset ] );
-
         $this->gc();
-        $this->notify( new Event( $this, Event::TYPE_UNSET, $offset ) );
     }
 
 
@@ -329,7 +317,7 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
         $event = @func_get_arg( 0 );
 
         if( !$event instanceof Event ) {
-            $event = new Event( $this, Event::TYPE_NOTIFY, null );
+            $event = new Event( $this, Event::NOTIFIED, null );
         }
 
         foreach( $this->observers as $observer ) {
