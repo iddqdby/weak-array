@@ -134,22 +134,7 @@ $weak_array->attach($observer);
 $foo = new stdClass();
 $weak_array['foo'] = $foo;
 
-// ... do something ...
-
 unset($foo);
-
-// ... do something more ...
-
-// Note that garbage collection is less intensive (not immediate)
-// when detection of object destructions is enabled;
-// you can make it more intensive (paying for it with some performance)
-// by adjusting third argument of WeakArray constructor
-// (see WeakArray\WeakArray::__construct()).
-// 
-// Also you can force garbage collector to run immediately by calling
-// "gc_collect_cycles()".
-
-gc_collect_cycles();
 ```
 
 #### Output
@@ -158,12 +143,12 @@ gc_collect_cycles();
 Object foo destroyed by garbage collector.
 ```
 
-See `test/` directory for more examples.
+See `examples/` and `test/` directories for working examples.
 
 ## Requirements
 
-* PHP >= 5.5
-* WeakRef PHP extension >= 0.3
+* PHP: 5.6 || >=7.0
+* WeakRef PHP extension: 0.2.6 for PHP 5.6 || >= 0.3 for PHP 7.0
 
 ## Versioning
 
