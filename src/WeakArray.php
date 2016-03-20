@@ -42,17 +42,18 @@ use InvalidArgumentException;
  * WARNING: if detection of destructions is enabled in the constructor
  * ($detect_destructions parameter of the constructor is set to true)
  * stored objects should not have a *property* named "__destruct",
- * and it should be possible to create nonexistent properties dynamically
- * for these objects (i.e. objects should not implement magic method "__set()");
- * otherwise it will be impossible to detect destruction of such stored objects
- * (event of type "WeakArray\Event::TYPE_DESTRUCT" will not raise for these objects).
+ * and it should be possible to create and unset nonexistent properties dynamically
+ * for these objects (i.e. objects should not implement magic methods "__set()"
+ * and "__unset()"); otherwise it will be impossible to detect destruction of such
+ * stored objects (event of type "WeakArray\Event::TYPE_DESTRUCT" will not raise
+ * for these objects).
  */
 class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
 
-    /** Default amout of interactions with instance of WeakArray before enforcing the garbage collecting */
+    /** Default amout of interactions with instance of WeakArray before enforcing internal garbage collection */
     const GARBAGE_COLLECTION_PERIOD_DEFAULT = 1024;
 
-    /** Minimal amout of interactions with instance of WeakArray to enforce intensive garbage collecting */
+    /** Minimal amout of interactions with instance of WeakArray before enforcing internal garbage collection */
     const GARBAGE_COLLECTION_PERIOD_INTENSIVE = 1;
 
 
@@ -101,7 +102,6 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
             $this->gc_int_count = 0;
             // "array_filter()" resets internal array pointer, so we don't use it;
             // internal array pointer is used in implemented methods of the "Iterator" interface
-            gc_collect_cycles();
             foreach( array_keys( $this->array ) as $key ) {
                 if( !$this->array[ $key ]->valid() ) {
                     unset( $this->array[ $key ] );
@@ -160,8 +160,7 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
 
     public function offsetGet( $offset ) {
         $this->gc();
-        $value = isset( $this->array[ $offset ] ) ? $this->array[ $offset ]->get() : null;
-        return $value instanceof DestructionDetector ? $value->getObject() : $value;
+        return isset( $this->array[ $offset ] ) ? $this->array[ $offset ]->get() : null;
     }
 
 
@@ -169,28 +168,6 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
 
         if( !is_object( $value ) ) {
             throw new InvalidArgumentException( sprintf( 'WeakArray can hold only objects, "%s" given.', gettype( $value ) ) );
-        }
-        if( $value instanceof DestructionDetector ) {
-            throw new InvalidArgumentException( 'Unable to save instance of DestructionDetector straightforwardly.' );
-        }
-
-        $dd = null;
-        if(
-            $this->detect_destructions
-            &&
-            !property_exists( $value, '__destruct' )
-            &&
-            !method_exists( $value, '__set' )
-        ) {
-            // Saving reference to instance of DestructionDetector in a property
-            // of an object prevents immediate garbage collection of that instance
-            // after leaving current scope, but it creates a circular reference,
-            // so we need to invoke gc_collect_cycles() periodically to speed-up
-            // garbage collection;
-            // see https://secure.php.net/manual/en/features.gc.collecting-cycles.php
-            $dd = new DestructionDetector( $this, $offset, $value );
-            $value->__destruct = $dd;
-            $value = $dd;
         }
 
         $reference = new WeakRef( $value );
@@ -203,13 +180,20 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
             $array_copy = $this->array;
             end( $array_copy );
             $offset = key( $array_copy );
-
-            if( $dd ) {
-                $dd->setKey( $offset );
-            }
-
         } else {
             $this->array[ $offset ] = $reference;
+        }
+
+        if(
+            $this->detect_destructions
+            &&
+            !property_exists( $value, '__destruct' )
+            &&
+            !method_exists( $value, '__set' )
+            &&
+            !method_exists( $value, '__unset' )
+        ) {
+            $value->__destruct = new DestructionDetector( $this, $offset );
         }
 
         $this->gc();
@@ -220,6 +204,12 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
 
 
     public function offsetUnset( $offset ) {
+
+        $value = $this[ $offset ];
+        if( isset( $value->__destruct ) ) {
+            $value->__destruct->deactivate();
+            unset( $value->__destruct );
+        }
 
         unset( $this->array[ $offset ] );
 
@@ -256,7 +246,7 @@ class WeakArray implements Countable, ArrayAccess, Iterator, SplSubject {
 
             $value = $reference->get();
             if( $value ) {
-                return $value instanceof DestructionDetector ? $value->getObject() : $value;
+                return $value;
             }
 
             unset( $this->array[ key( $this->array ) ] );

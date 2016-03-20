@@ -27,7 +27,6 @@
 namespace WeakArray;
 
 use WeakRef;
-use InvalidArgumentException;
 
 
 /**
@@ -38,53 +37,33 @@ final class DestructionDetector {
 
     private $ref_weak_array;
     private $key;
-    private $object;
+    private $active = true;
 
 
     /**
-     * Create new destruction detector for an object.
+     * Create new destruction detector.
      *
      * @param WeakArray $weak_array an instance of WeakArray
      * @param int|string $key the key
-     * @param object $object the object
-     * @throws InvalidArgumentException if $object is not an object
      */
-    public function __construct( WeakArray $weak_array, $key, $object ) {
-
-        if( !is_object( $object ) ) {
-            throw new InvalidArgumentException( sprintf( 'An object must be provided, "%s" given.', gettype( $object ) ) );
-        }
-
+    public function __construct( WeakArray $weak_array, $key ) {
         $this->ref_weak_array = new WeakRef( $weak_array );
         $this->key = $key;
-        $this->object = $object;
     }
 
 
     public function __destruct() {
-        if( $weak_array = $this->ref_weak_array->get() ) {
+        if( $this->active && ( $weak_array = $this->ref_weak_array->get() ) ) {
             $weak_array->notify( new Event( $weak_array, Event::TYPE_DESTRUCT, $this->key ) );
         }
     }
 
 
     /**
-     * Set the key.
-     *
-     * @param int|string $key the key
+     * Deactivate destruction detector.
      */
-    public function setKey( $key ) {
-        $this->key = $key;
-    }
-
-
-    /**
-     * Get wrapped object.
-     *
-     * @return object the wrapped object
-     */
-    public function getObject() {
-        return $this->object;
+    public function deactivate() {
+        $this->active = false;
     }
 
 }
