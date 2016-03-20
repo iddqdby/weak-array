@@ -40,7 +40,7 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
             3 => $three,
         ];
 
-        $this->weak_array = new WeakArray( $this->objects, true );
+        $this->weak_array = new WeakArray( $this->objects );
     }
 
 
@@ -620,9 +620,6 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
         $obj4 = new stdClass();
         $obj5 = new stdClass();
         $obj6 = new stdClass();
-        $obj7 = new stdClass();
-        $obj8 = new stdClass();
-        $obj9 = new stdClass();
 
         $obj0->val = 0;
         $obj1->val = 1;
@@ -631,9 +628,6 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
         $obj4->val = 4;
         $obj5->val = 5;
         $obj6->val = 6;
-        $obj7->val = 7;
-        $obj8->val = 8;
-        $obj9->val = 9;
 
         $expected_1 = [];
         $expected_2 = [];
@@ -649,9 +643,9 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
 
         $this->weak_array[1001] = $obj1;
 
-        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_SET, 'key' => 1001 ];
-        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_SET, 'key' => 1001 ];
-        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_SET, 'key' => 1001 ];
+        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_SET, 'key' => 1001 ];
+        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_SET, 'key' => 1001 ];
+        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_SET, 'key' => 1001 ];
 
 
         $this->assertEquals( $expected_1, $obs1->collected() );
@@ -663,8 +657,8 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
 
         $this->weak_array[] = $obj2;
 
-        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_SET, 'key' => 1002 ];
-        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_SET, 'key' => 1002 ];
+        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_SET, 'key' => 1002 ];
+        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_SET, 'key' => 1002 ];
 
 
         $this->assertEquals( $expected_1, $obs1->collected() );
@@ -676,8 +670,8 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
 
         $this->weak_array[0] = $obj3;
 
-        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_SET, 'key' => 0 ];
-        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_SET, 'key' => 0 ];
+        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_SET, 'key' => 0 ];
+        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_SET, 'key' => 0 ];
 
 
         $this->assertEquals( $expected_1, $obs1->collected() );
@@ -690,7 +684,7 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
 
         $this->weak_array[''] = $obj4;
 
-        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_SET, 'key' => '' ];
+        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_SET, 'key' => '' ];
 
 
         $this->assertEquals( $expected_1, $obs1->collected() );
@@ -718,9 +712,9 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
 
         unset( $this->weak_array[1001] );
 
-        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_UNSET, 'key' => 1001 ];
-        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_UNSET, 'key' => 1001 ];
-        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_UNSET, 'key' => 1001 ];
+        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_UNSET, 'key' => 1001 ];
+        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_UNSET, 'key' => 1001 ];
+        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_UNSET, 'key' => 1001 ];
 
 
         $this->assertEquals( $expected_1, $obs1->collected() );
@@ -731,13 +725,13 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
         unset( $this->weak_array[0] );
         unset( $this->weak_array[''] );
 
-        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_UNSET, 'key' => 0 ];
-        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_UNSET, 'key' => 0 ];
-        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_UNSET, 'key' => 0 ];
+        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_UNSET, 'key' => 0 ];
+        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_UNSET, 'key' => 0 ];
+        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_UNSET, 'key' => 0 ];
 
-        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_UNSET, 'key' => '' ];
-        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_UNSET, 'key' => '' ];
-        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_UNSET, 'key' => '' ];
+        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_UNSET, 'key' => '' ];
+        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_UNSET, 'key' => '' ];
+        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_UNSET, 'key' => '' ];
 
 
         $this->assertEquals( $expected_1, $obs1->collected() );
@@ -747,9 +741,9 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
 
         $this->weak_array->notify();
 
-        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_NOTIFY, 'key' => null ];
-        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_NOTIFY, 'key' => null ];
-        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_NOTIFY, 'key' => null ];
+        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::NOTIFIED, 'key' => null ];
+        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::NOTIFIED, 'key' => null ];
+        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::NOTIFIED, 'key' => null ];
 
 
         $this->assertEquals( $expected_1, $obs1->collected() );
@@ -760,9 +754,9 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
         unset( $obj4 ); // '' -- previously unset, must not detect destruction
         unset( $obj3 ); // 0 -- previously unset, must not detect destruction
 
-        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_DESTRUCT, 'key' => 999 ];
-        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_DESTRUCT, 'key' => 999 ];
-        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_DESTRUCT, 'key' => 999 ];
+        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_DESTRUCTED, 'key' => 999 ];
+        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_DESTRUCTED, 'key' => 999 ];
+        $expected_3[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_DESTRUCTED, 'key' => 999 ];
 
 
         $this->assertEquals( $expected_1, $obs1->collected() );
@@ -774,13 +768,36 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
 
         unset( $obj2 ); // 1002 -- destruction must be detected
 
-        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_DESTRUCT, 'key' => 1002 ];
-        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::TYPE_DESTRUCT, 'key' => 1002 ];
+        $expected_1[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_DESTRUCTED, 'key' => 1002 ];
+        $expected_2[] = [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_DESTRUCTED, 'key' => 1002 ];
 
 
         $this->assertEquals( $expected_1, $obs1->collected() );
         $this->assertEquals( $expected_2, $obs2->collected() );
         $this->assertEquals( $expected_3, $obs3->collected() );
+
+
+        $this->weak_array->detach( $obs1 );
+        $this->weak_array->detach( $obs2 );
+
+        $this->weak_array[10001] = $obj6;
+        $this->weak_array[10002] = $obj6;
+        $this->weak_array[10003] = $obj6;
+
+        unset( $this->weak_array[10002] );
+
+        $obs_destr = new WeakArrayTest_Observer();
+        $this->weak_array->attach( $obs_destr );
+
+        unset( $obj6 );
+
+        $expected_destr = [
+            [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_DESTRUCTED, 'key' => 10001 ],
+            [ 'subject' => $this->weak_array, 'type' => Event::OBJECT_DESTRUCTED, 'key' => 10003 ],
+        ];
+
+
+        $this->assertEquals( $expected_destr, $obs_destr->collected() );
     }
 
 
@@ -802,15 +819,15 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
      */
     public function test_examples( $file ) {
 
-        ob_start();
-        $return_var = 0;
-        passthru( sprintf( '%s %s', PHP_BINARY, $file ), $return_var );
-        $contents = ob_get_clean();
+        $output = [];
+        $exit_code = 0;
+        exec( sprintf( '%s %s', PHP_BINARY, $file ), $output, $exit_code );
+        $contents = implode( "\n", $output );
 
         list( $actual, $expected ) = array_map( 'trim', explode( 'EXPECTED OUTPUT:', $contents ) );
 
         $this->assertEquals( $expected, $actual );
-        $this->assertEquals( 0, $return_var );
+        $this->assertEquals( 0, $exit_code );
     }
 
 
@@ -833,31 +850,31 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
     public function provider_Event_construct_Exception() {
         return [
             'key_boolean' => [
-                    Event::TYPE_SET,
+                    Event::OBJECT_SET,
                     true,
                     InvalidArgumentException::class,
                     'Key must be NULL, or of type "int" or "string", "boolean" given.',
             ],
             'key_double' => [
-                    Event::TYPE_SET,
+                    Event::OBJECT_SET,
                     3.14,
                     InvalidArgumentException::class,
                     'Key must be NULL, or of type "int" or "string", "double" given.',
             ],
             'key_array_0' => [
-                    Event::TYPE_SET,
+                    Event::OBJECT_SET,
                     [],
                     InvalidArgumentException::class,
                     'Key must be NULL, or of type "int" or "string", "array" given.',
             ],
             'key_array_1' => [
-                    Event::TYPE_SET,
+                    Event::OBJECT_SET,
                     [ 1, 2, 3 ],
                     InvalidArgumentException::class,
                     'Key must be NULL, or of type "int" or "string", "array" given.',
             ],
             'key_resource' => [
-                    Event::TYPE_SET,
+                    Event::OBJECT_SET,
                     fopen( __FILE__, 'r' ),
                     InvalidArgumentException::class,
                     'Key must be NULL, or of type "int" or "string", "resource" given.',
@@ -866,19 +883,19 @@ class WeakArrayTest extends PHPUnit_Framework_TestCase {
                     '',
                     'abc',
                     InvalidArgumentException::class,
-                    'Type must be one Event::TYPE_* constants.',
+                    'Type must be one of Event::* constants.',
             ],
             'type_1' => [
                     -1,
                     'abc',
                     InvalidArgumentException::class,
-                    'Type must be one Event::TYPE_* constants.',
+                    'Type must be one of Event::* constants.',
             ],
             'type_2' => [
                     999,
                     'abc',
                     InvalidArgumentException::class,
-                    'Type must be one Event::TYPE_* constants.',
+                    'Type must be one of Event::* constants.',
             ],
         ];
     }
