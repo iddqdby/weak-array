@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>PHP Weak Array by iddqdby</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>PHP Weak Array</h1>
+          <h2></h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/iddqdby/weak-array/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/iddqdby/weak-array/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/iddqdby/weak-array" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>
+<a id="weakarray" class="anchor" href="#weakarray" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>WeakArray</h1>
+
+<p><a href="https://travis-ci.org/iddqdby/weak-array"><img src="https://travis-ci.org/iddqdby/weak-array.svg?branch=master" alt="Build Status"></a></p>
+
+<h2>
+<a id="short-description" class="anchor" href="#short-description" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Short description</h2>
+
+<p>WeakArray is an array of weak references, based on WeakRef PHP extension (see <a href="https://pecl.php.net/package/Weakref">https://pecl.php.net/package/Weakref</a>).</p>
+
+<p>It keeps weak references to objects, allowing them to be garbage-collected when there are no other references present.</p>
+
+<h2>
+<a id="how-to-install" class="anchor" href="#how-to-install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How to install</h2>
+
+<div class="highlight highlight-source-shell"><pre>composer require iddqdby/weak-array</pre></div>
+
+<h2>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Examples</h2>
+
+<h3>
+<a id="basic-usage" class="anchor" href="#basic-usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Basic usage</h3>
+
+<h4>
+<a id="code" class="anchor" href="#code" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Code</h4>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$weak_array</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">WeakArray\</span><span class="pl-c1">WeakArray</span>();</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$foo</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">stdClass</span>();</span>
+<span class="pl-s1"><span class="pl-smi">$bar</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">stdClass</span>();</span>
+<span class="pl-s1"><span class="pl-smi">$baz</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">stdClass</span>();</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$weak_array</span>[<span class="pl-s"><span class="pl-pds">'</span>foo<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-smi">$foo</span>;</span>
+<span class="pl-s1"><span class="pl-smi">$weak_array</span>[<span class="pl-s"><span class="pl-pds">'</span>bar<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-smi">$bar</span>;</span>
+<span class="pl-s1"><span class="pl-smi">$weak_array</span>[<span class="pl-s"><span class="pl-pds">'</span>baz<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-smi">$baz</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c1">var_export</span>(<span class="pl-smi">$weak_array</span>[<span class="pl-s"><span class="pl-pds">'</span>foo<span class="pl-pds">'</span></span>]);</span>
+<span class="pl-s1"><span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c1">var_export</span>(<span class="pl-smi">$weak_array</span>[<span class="pl-s"><span class="pl-pds">'</span>bar<span class="pl-pds">'</span></span>]);</span>
+<span class="pl-s1"><span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c1">var_export</span>(<span class="pl-smi">$weak_array</span>[<span class="pl-s"><span class="pl-pds">'</span>baz<span class="pl-pds">'</span></span>]);</span>
+<span class="pl-s1"><span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>====<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c1">unset</span>(<span class="pl-smi">$foo</span>);</span>
+<span class="pl-s1"><span class="pl-c1">unset</span>(<span class="pl-smi">$bar</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c1">var_export</span>(<span class="pl-smi">$weak_array</span>[<span class="pl-s"><span class="pl-pds">'</span>foo<span class="pl-pds">'</span></span>]);</span>
+<span class="pl-s1"><span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c1">var_export</span>(<span class="pl-smi">$weak_array</span>[<span class="pl-s"><span class="pl-pds">'</span>bar<span class="pl-pds">'</span></span>]);</span>
+<span class="pl-s1"><span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c1">var_export</span>(<span class="pl-smi">$weak_array</span>[<span class="pl-s"><span class="pl-pds">'</span>baz<span class="pl-pds">'</span></span>]);</span>
+<span class="pl-s1"><span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</span></pre></div>
+
+<h4>
+<a id="output" class="anchor" href="#output" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Output</h4>
+
+<pre><code>stdClass::__set_state(array(
+))
+stdClass::__set_state(array(
+))
+stdClass::__set_state(array(
+))
+====
+NULL
+NULL
+stdClass::__set_state(array(
+))
+</code></pre>
+
+<h3>
+<a id="events" class="anchor" href="#events" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Events</h3>
+
+<h4>
+<a id="code-1" class="anchor" href="#code-1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Code</h4>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">Observer</span> <span class="pl-k">implements</span> <span class="pl-c1">\SplObserver</span> {</span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">update</span>(<span class="pl-c1">\SplSubject</span> <span class="pl-smi">$event</span>) {</span>
+<span class="pl-s1">        <span class="pl-c">// $event instanceof WeakArray\Event;</span></span>
+<span class="pl-s1">        <span class="pl-c">// see WeakArray\Event class to view all available methods and Event::* constants</span></span>
+<span class="pl-s1">        <span class="pl-k">switch</span> (<span class="pl-smi">$event</span><span class="pl-k">-&gt;</span>getType()) {</span>
+<span class="pl-s1">            <span class="pl-k">case</span> <span class="pl-c1">WeakArray\</span><span class="pl-c1">Event</span><span class="pl-k">::</span><span class="pl-c1">OBJECT_SET</span>:</span>
+<span class="pl-s1">                <span class="pl-smi">$event_str</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>set<span class="pl-pds">'</span></span>;</span>
+<span class="pl-s1">                <span class="pl-k">break</span>;</span>
+<span class="pl-s1">            <span class="pl-k">case</span> <span class="pl-c1">WeakArray\</span><span class="pl-c1">Event</span><span class="pl-k">::</span><span class="pl-c1">OBJECT_UNSET</span>:</span>
+<span class="pl-s1">                <span class="pl-smi">$event_str</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>unset<span class="pl-pds">'</span></span>;</span>
+<span class="pl-s1">                <span class="pl-k">break</span>;</span>
+<span class="pl-s1">            <span class="pl-k">case</span> <span class="pl-c1">WeakArray\</span><span class="pl-c1">Event</span><span class="pl-k">::</span><span class="pl-c1">OBJECT_DESTRUCTED</span>:</span>
+<span class="pl-s1">                <span class="pl-smi">$event_str</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>destructed<span class="pl-pds">'</span></span>;</span>
+<span class="pl-s1">                <span class="pl-k">break</span>;</span>
+<span class="pl-s1">        }</span>
+<span class="pl-s1">        <span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>Object %s, key %s<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, <span class="pl-smi">$event_str</span>, <span class="pl-smi">$event</span><span class="pl-k">-&gt;</span>getKey());</span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1">}</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$weak_array</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">WeakArray\</span><span class="pl-c1">WeakArray</span>();</span>
+<span class="pl-s1"><span class="pl-smi">$observer</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Observer</span>();</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$weak_array</span><span class="pl-k">-&gt;</span>attach(<span class="pl-smi">$observer</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$foo</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">stdClass</span>();</span>
+<span class="pl-s1"><span class="pl-smi">$bar</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">stdClass</span>();</span>
+<span class="pl-s1"><span class="pl-smi">$baz</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">stdClass</span>();</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-smi">$weak_array</span>[<span class="pl-s"><span class="pl-pds">'</span>foo<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-smi">$foo</span>;</span>
+<span class="pl-s1"><span class="pl-smi">$weak_array</span>[<span class="pl-s"><span class="pl-pds">'</span>bar<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-smi">$bar</span>;</span>
+<span class="pl-s1"><span class="pl-smi">$weak_array</span>[<span class="pl-s"><span class="pl-pds">'</span>baz<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> <span class="pl-smi">$baz</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c1">unset</span>(<span class="pl-smi">$foo</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c1">unset</span>(<span class="pl-smi">$weak_array</span>[<span class="pl-s"><span class="pl-pds">'</span>bar<span class="pl-pds">'</span></span>]);</span>
+<span class="pl-s1"><span class="pl-c1">unset</span>(<span class="pl-smi">$weak_array</span>[<span class="pl-s"><span class="pl-pds">'</span>baz<span class="pl-pds">'</span></span>]);</span></pre></div>
+
+<h4>
+<a id="output-1" class="anchor" href="#output-1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Output</h4>
+
+<pre><code>Object set, key foo
+Object set, key bar
+Object set, key baz
+Object destructed, key foo
+Object unset, key bar
+Object unset, key baz
+</code></pre>
+
+<p>See <code>examples/</code> and <code>test/</code> directories for working examples.</p>
+
+<h2>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Requirements</h2>
+
+<ul>
+<li>PHP: 5.5, 5.6, 7.0</li>
+<li>WeakRef PHP extension: 0.2.6 for PHP 5.5 and PHP 5.6, &gt;=0.3 for PHP 7.0</li>
+</ul>
+
+<h2>
+<a id="versioning" class="anchor" href="#versioning" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Versioning</h2>
+
+<p>This project follows the <a href="http://semver.org/">Semantic Versioning</a> principles.</p>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
+
+<p>This project is licensed under the MIT License. See <a href="LICENSE">LICENSE</a>.</p>
+        </section>
+
+        <footer>
+          PHP Weak Array is maintained by <a href="https://github.com/iddqdby">iddqdby</a><br>
+          This page was generated by <a href="https://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
