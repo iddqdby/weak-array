@@ -79,8 +79,19 @@ stdClass::__set_state(array(
 class Observer implements \SplObserver {
     public function update(\SplSubject $event) {
         // $event instanceof WeakArray\Event;
-        // see WeakArray\Event class to view all available methods and Event::TYPE_* constants
-        printf("Event %s, key %s\n", $event->getType(), $event->getKey());
+        // see WeakArray\Event class to view all available methods and Event::* constants
+        switch ($event->getType()) {
+            case WeakArray\Event::OBJECT_SET:
+                $event_str = 'set';
+                break;
+            case WeakArray\Event::OBJECT_UNSET:
+                $event_str = 'unset';
+                break;
+            case WeakArray\Event::OBJECT_DESTRUCTED:
+                $event_str = 'destructed';
+                break;
+        }
+        printf("Object %s, key %s\n", $event_str, $event->getKey());
     }
 }
 
@@ -97,7 +108,8 @@ $weak_array['foo'] = $foo;
 $weak_array['bar'] = $bar;
 $weak_array['baz'] = $baz;
 
-unset($weak_array['foo']);
+unset($foo);
+
 unset($weak_array['bar']);
 unset($weak_array['baz']);
 ```
@@ -105,52 +117,20 @@ unset($weak_array['baz']);
 #### Output
 
 ```
-Event 1, key foo
-Event 1, key bar
-Event 1, key baz
-Event 2, key foo
-Event 2, key bar
-Event 2, key baz
-```
-
-It is also possible to detect destruction of stored objects by garbage collector:
-
-#### Code
-
-```php
-class Observer implements \SplObserver {
-    public function update(\SplSubject $event) {
-        if(WeakArray\Event::TYPE_DESTRUCT == $event->getType()) {
-          printf("Object %s destroyed by garbage collector.\n", $event->getKey());
-        }
-    }
-}
-
-// Set second optional parameter to true to enable detection of destruction;
-// see WeakArray\WeakArray::__construct() to view all available parameters
-$weak_array = new WeakArray\WeakArray([], true);
-$observer = new Observer();
-
-$weak_array->attach($observer);
-
-$foo = new stdClass();
-$weak_array['foo'] = $foo;
-
-unset($foo);
-```
-
-#### Output
-
-```
-Object foo destroyed by garbage collector.
+Object set, key foo
+Object set, key bar
+Object set, key baz
+Object destructed, key foo
+Object unset, key bar
+Object unset, key baz
 ```
 
 See `examples/` and `test/` directories for working examples.
 
 ## Requirements
 
-* PHP: 5.6 || >=7.0
-* WeakRef PHP extension: 0.2.6 for PHP 5.6 || >= 0.3 for PHP 7.0
+* PHP: 5.5, 5.6, 7.0
+* WeakRef PHP extension: 0.2.6 for PHP 5.5 and PHP 5.6, >=0.3 for PHP 7.0
 
 ## Versioning
 
