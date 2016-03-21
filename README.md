@@ -14,6 +14,8 @@ It keeps weak references to objects, allowing them to be garbage-collected when 
 composer require iddqdby/weak-array
 ```
 
+or download the archive, extract it and include file `autoload.php`.
+
 ## Examples
 
 ### Basic usage
