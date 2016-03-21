@@ -5,4 +5,4 @@ if( function_exists( 'opcache_reset' ) ) {
 }
 gc_enable();
 
-require_once __DIR__.'/../vendor/autoload.php';
+require_once dirname( __DIR__ ).'/autoload.php';
