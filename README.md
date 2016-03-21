@@ -1,6 +1,6 @@
 # WeakArray
 
-[![Build Status](https://travis-ci.org/iddqdby/weak-array.svg?branch=master)](https://travis-ci.org/iddqdby/weak-array)
+[![Build Status](https://travis-ci.org/iddqdby/weak-array.svg?branch=2.0.x)](https://travis-ci.org/iddqdby/weak-array)
 
 ## Short description
 
