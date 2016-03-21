@@ -1,6 +1,9 @@
 # WeakArray
 
 [![Build Status](https://travis-ci.org/iddqdby/weak-array.svg?branch=master)](https://travis-ci.org/iddqdby/weak-array)
+[![Latest Stable Version](https://poser.pugx.org/iddqdby/weak-array/v/stable)](https://packagist.org/packages/iddqdby/weak-array)
+[![Total Downloads](https://poser.pugx.org/iddqdby/weak-array/downloads)](https://packagist.org/packages/iddqdby/weak-array)
+[![License](https://poser.pugx.org/iddqdby/weak-array/license)](https://packagist.org/packages/iddqdby/weak-array)
 
 ## Short description
 
@@ -133,6 +136,10 @@ See `examples/` and `test/` directories for working examples.
 
 * PHP: 5.5, 5.6, 7.0
 * WeakRef PHP extension: 0.2.6 for PHP 5.5 and PHP 5.6, >=0.3 for PHP 7.0
+
+## Homepage
+
+https://iddqdby.github.io/weak-array/
 
 ## Versioning
 
